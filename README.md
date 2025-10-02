@@ -8,7 +8,7 @@ This repository is a fork and adaptation of the original [MuSR project](https://
 
 **Original Authors:** zayne@utexas.edu {xi, kaj, swarat, gdurrett}@cs.utexas.edu
 
-**Modifications:** This fork modifies the domain-specific components, sampling logic, and prompting strategies to generate German tax law cases while preserving the core MuSR reasoning framework.
+**Modifications:** This fork variates the domain-specific components, sampling logic, and prompting strategies to generate German tax law cases while preserving the core MuSR reasoning framework.
 
 ## Installation
 
@@ -50,6 +50,8 @@ OPENAI_API_KEY=key python musr_dataset_scripts/create_german_tax_law_case.py
 ```
 The generated dataset will be saved in datasets/german_tax_law_case.json
 
+'german_tax_law_case.html' will be generated in the root directory which visualize the generated law case and the reasoning tree. 
+
 ## Key Implementation
 
 ### Domain Seed Replacement
@@ -59,7 +61,9 @@ The generated dataset will be saved in datasets/german_tax_law_case.json
 </p>
 
 Replaced murder mystery MMO(Motivation, Means, Opportunity) components and related domain seed to LEP(Applicable Law, Economic Activity, Procedural Requirements).
+To make created law case for LLM to reason, we merged two different law cases and set a question which one is more likely to be accepted. 
 
+[Check created example law cases & example question](https://whitetrafficlight.github.io/MuSR_TaxLaw/)
 
 ### CrewAI Integration for Modular Prompt Management
 
@@ -76,28 +80,6 @@ The new `src/crews/` directory contains:
 - **tree_builder.py**: CrewAI-integrated tree expansion logic
 - **runner.py**: Orchestrates the multi-agent reasoning process
 
-
-### Viewing Generated Cases
-
-After running the dataset generation script, you can view the generated German tax law cases in an interactive HTML format:
-
-- **HTML Visualization**: Open `german_tax_law_case.html` in your browser to see a side-by-side comparison of generated tax law cases
-- **Features**: 
-  - Interactive reasoning tree visualization with collapsible nodes
-  - Detailed case stories and metadata
-  - Color-coded fact types (explicit vs. commonsense knowledge)
-  - Question-answer format for evaluation
-
-The HTML file provides a comprehensive view of:
-- Business sector and transaction type context
-- Taxpayer and tax authority information
-- Decision outcomes (accept with conditions, fully reject, etc.)
-- Complete reasoning trees with logical operators
-- Generated court decision narratives
-
-### Example Generated Case
-
-You can see an example of the generated German tax law cases by opening [assets/german_tax_law_case_ex.html](assets/german_tax_law_case_ex.html) in your browser.
 
 
 
