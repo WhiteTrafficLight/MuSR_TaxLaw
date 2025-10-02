@@ -462,7 +462,6 @@ class LogicTree:
         return cls(**js)
 
 
-
 if __name__ == "__main__":
     """ EXAMPLE USES """
 
@@ -626,4 +625,5 @@ if __name__ == "__main__":
     tv_scene_ex()
     eb_ex()
     action_ex()
+
 

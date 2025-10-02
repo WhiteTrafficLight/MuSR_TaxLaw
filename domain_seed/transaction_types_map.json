@@ -1,0 +1,32 @@
+{
+  "transaction_types": [
+    "ip_licensing",
+    "function_transfer",
+    "cross_border_financing",
+    "service_arrangement"
+  ],
+  
+  "sector_to_transactions": {
+    "IT consulting and software development": ["ip_licensing", "service_arrangement"],
+    "Manufacturing equipment": ["function_transfer", "service_arrangement"],
+    "Software development": ["ip_licensing", "service_arrangement"],
+    "Pharmaceutical research": ["ip_licensing", "function_transfer"],
+    "Financial services": ["cross_border_financing", "service_arrangement"],
+    "Automotive manufacturing": ["function_transfer", "service_arrangement"],
+    "Chemical production": ["function_transfer", "ip_licensing"],
+    "Medical devices": ["function_transfer", "ip_licensing"],
+    "Telecommunications": ["service_arrangement", "ip_licensing"],
+    "Industrial machinery": ["function_transfer", "service_arrangement"],
+    "Energy production": ["function_transfer", "service_arrangement"],
+    "Food processing": ["function_transfer", "service_arrangement"],
+    "Electronics manufacturing": ["function_transfer", "ip_licensing"],
+    "Logistics and transportation": ["service_arrangement", "function_transfer"],
+    "Aerospace engineering": ["function_transfer", "ip_licensing"],
+    "Biotechnology": ["ip_licensing", "function_transfer"],
+    "Construction materials": ["function_transfer", "service_arrangement"],
+    "Textile manufacturing": ["function_transfer", "service_arrangement"],
+    "Agricultural technology": ["function_transfer", "ip_licensing"],
+    "Environmental technology": ["ip_licensing", "service_arrangement"]
+  }
+}
+

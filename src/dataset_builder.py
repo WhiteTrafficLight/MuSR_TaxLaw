@@ -6,7 +6,7 @@ import random
 from tqdm import tqdm
 from functools import partial
 
-random.seed(0)
+# random.seed(0)  #Commented out to allow random variation
 
 from src.madlib.madlib import Madlib
 from src.logic_tree.tree import LogicNode, LogicTree, LogicNodeFactType
