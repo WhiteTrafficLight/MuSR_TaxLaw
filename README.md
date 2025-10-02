@@ -10,17 +10,28 @@ This repository is a fork and adaptation of the original [MuSR project](https://
 
 **Modifications:** This fork modifies the domain-specific components, sampling logic, and prompting strategies to generate German tax law cases while preserving the core MuSR reasoning framework.
 
-<image src="./imgs/logo.png"></image>
-
 ## German Tax Law Case Evaluation
 
 The datasets are in `datasets/german_tax_law_case.json` and `datasets/german_tax_law_case2.json`
 
 ### Install
 
-1. `virtualenv venv` we have tested with python 3.8
+**Note**: The project has been tested with the `taxlaw` conda environment using Python 3.10.
+
+**Option 1: Using Conda with Editable Install (Recommended)**
+1. `conda create -n taxlaw python=3.10`
+2. `conda activate taxlaw`
+3. `pip install -e .`
+
+**Option 2: Using Virtual Environment with Editable Install**
+1. `virtualenv venv` (tested with python 3.10)
 2. `source venv/bin/activate`
-3. `pip install -r requirements.txt`
+3. `pip install -e .`
+
+**Option 3: Manual Requirements Install**
+1. Create and activate your environment (conda or virtualenv)
+2. `pip install -r requirements.txt`
+
 
 ### Evaluate
 
@@ -45,15 +56,22 @@ Easiest way to install it is (for linux)
 
 Alternatively you can run our code without redis or disable the cache entirely by commenting out the lines `cache.enable()`.
 
-### New models
+### CrewAI Integration for Modular Prompt Management
 
-Right now we support all the OpenAI endpoints and models published on Huggingface.  
+Unlike the murder mystery domain which uses a single prompt for tree node expansion, German tax law case domain requires component and depth-specific prompts. Therefore, we integrated CrewAI for dynamic prompt management and made structural changes to the `src` directory.
 
-Custom models made in PyTorch or Tensorflow will need to have an implementation that follows from the `Model` class in `src/model/model.py` similar to `src/model/hf.py` (for Huggingface).  
+The new `src/crews/` directory contains:
+- **agents.py**: Specialized agents for different aspects of tax law reasoning (legal, economic, procedural)
+- **tasks.py**: Task definitions for different reasoning components
+- **config/prompts/**: Modular prompt templates organized by domain:
+  - `law.py`: Legal reasoning prompts
+  - `econ.py`: Economic analysis prompts  
+  - `proc.py`: Procedural compliance prompts
+  - `story.py`: Narrative generation prompts
+- **tree_builder.py**: CrewAI-integrated tree expansion logic
+- **runner.py**: Orchestrates the multi-agent reasoning process
 
-### New prompts and MuSR domain datasets
 
-These are easily added to the `eval/eval.py` file.
 
 
 ## Overview of MuSR-TaxLaw
@@ -64,7 +82,27 @@ This repository is a modified version of the original MuSR framework, adapted fo
 
 German tax law case datasets can be found in `{project_root}/datasets`. The domain-specific seed data for generating tax law scenarios is located in `{project_root}/domain_seed/`.
 
-Major components for making the MuSR dataset can be found in `{project_root}/src`.  
+Major components for making the German tax law datasets can be found in `{project_root}/src`, with the following structure:
+
+```
+src/
+├── crews/                    # CrewAI integration for multi-agent reasoning
+│   ├── agents.py            # Specialized agents (legal, economic, procedural)
+│   ├── tasks.py             # Task definitions for reasoning components
+│   ├── config/prompts/      # Modular prompt templates
+│   │   ├── law.py          # Legal reasoning prompts
+│   │   ├── econ.py         # Economic analysis prompts
+│   │   ├── proc.py         # Procedural compliance prompts
+│   │   └── story.py        # Narrative generation prompts
+│   ├── tree_builder.py     # CrewAI-integrated tree expansion
+│   └── runner.py           # Multi-agent orchestration
+├── dataset_types/          # Domain-specific dataset logic
+│   └── german_tax_dataset.py
+├── logic_tree/             # Core reasoning tree structure
+├── model/                  # LLM interface abstractions
+├── utils/                  # Utility functions and caching
+└── validators/             # Output validation logic
+```
 
 Important classes and structures will have some example uses in their files (Madlib and LogicTree for example)
 
@@ -80,23 +118,48 @@ The German tax law case creation script is in `{project_root}/musr_dataset_scrip
 To run the script:
 
 ```shell
-cd musr_dataset_scripts
 OPENAI_API_KEY=key python musr_dataset_scripts/create_german_tax_law_case.py
 ```
+
+**Model Configuration:**
+Agent models can be configured in `src/crews/runner.py`:
+- **Main generation model** (lines 43-53): Used for tree expansion and story generation
+- **Validation models** (lines 59-78): Used for LLM-based validation when `--use-model-validator` flag is enabled
+- **CrewAI agent models**: Configured in `src/crews/agents.py` functions `create_tree_agent()` and `create_story_agent()`
+
+To use different models, modify the `engine` parameter in the respective `OpenAIModel` configurations or the `model` parameter in agent creation functions.
+
+**Advanced Usage:**
+```shell
+# Use LLM-based validation (more accurate but expensive)
+OPENAI_API_KEY=key python musr_dataset_scripts/create_german_tax_law_case.py --use-model-validator
+```
+
 NOTE: This has been tested with GPT-4. Quality may significantly degrade if you use a different model due to the prompts being heavily tailored to GPT-4 and the requirement for strict formatting in legal reasoning outputs.
 
 This will produce a German tax law case dataset file in `{project_root}/datasets` after it completes.
 
-## Creating your own dataset
+### Viewing Generated Cases
 
-You can implement your own DatasetBuilder following the examples for the other domains.
+After running the dataset generation script, you can view the generated German tax law cases in an interactive HTML format:
 
-For example, the important files used in creating German tax law cases are:
+- **HTML Visualization**: Open `german_tax_law_case.html` in your browser to see a side-by-side comparison of generated tax law cases
+- **Features**: 
+  - Interactive reasoning tree visualization with collapsible nodes
+  - Detailed case stories and metadata
+  - Color-coded fact types (explicit vs. commonsense knowledge)
+  - Question-answer format for evaluation
 
-`{project_root}/src/dataset_builder.py`: The main file used for creating all datasets (shared functionality including the recursive reasoning tree expansion algorithm).
+The HTML file provides a comprehensive view of:
+- Business sector and transaction type context
+- Taxpayer and tax authority information
+- Decision outcomes (accept with conditions, fully reject, etc.)
+- Complete reasoning trees with logical operators
+- Generated court decision narratives
 
-`{project_root}/src/dataset_types/german_tax_dataset.py`: Specific domain logic (and some prompts) for creating the German tax law cases.
+### Example Generated Case
 
-`{project_root}/musr_dataset_scripts/create_german_tax_law_case.py`: The main file that glues everything together (and includes some more prompts).
+You can see an example of the generated German tax law cases by opening [assets/german_tax_law_case_ex.html](assets/german_tax_law_case_ex.html) in your browser.
 
-`{project_root}/domain_seed/`: Contains domain-specific seed data for German tax law scenarios, including business sectors, transaction types, tax authorities, and various compliance scenarios. 
+
+
