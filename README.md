@@ -51,7 +51,9 @@ OPENAI_API_KEY=key python musr_dataset_scripts/create_german_tax_law_case.py
 The generated dataset will be saved in datasets/german_tax_law_case.json
 
 ## Key Implementation
-![Tree Comparison between Murder Mystery & Tax Law Case](./assets/tree_comparison.png)
+<p align="center">
+  <img src="./assets/tree_comparison.png" alt="Tree Comparison between Murder Mystery & Tax Law Case" width="600"/>
+</p>
 
 ### Domain Seed Replacement
 
