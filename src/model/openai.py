@@ -1,7 +1,7 @@
 import os
 import itertools
 import time
-import openai
+from openai import OpenAI
 
 from datetime import timedelta
 import random
@@ -68,6 +68,7 @@ class OpenAIModel(Model):
         """
 
         self.engine = engine
+        self.client = OpenAI()  # Initialize OpenAI client
 
         self.api_max_attempts = api_max_attempts
         self.api_endpoint = api_endpoint.lower()
@@ -89,8 +90,7 @@ class OpenAIModel(Model):
         self.completion_cost = completion_cost
         self.total_cost = 0.0
 
-        if not openai.api_key:
-            openai.api_key = os.getenv("OPENAI_API_KEY")
+        # API key is now handled automatically by OpenAI client
 
     def __update_cost__(self, raw):
         if self.prompt_cost and self.completion_cost:
@@ -143,8 +143,8 @@ class OpenAIModel(Model):
         last_exc = None
         for i in range(self.api_max_attempts):
             try:
-                return openai.Completion.create(
-                    engine=self.engine,
+                return self.client.completions.create(
+                    model=self.engine,
                     prompt=prompt,
                     temperature=temperature,
                     max_tokens=max_tokens,
@@ -153,22 +153,13 @@ class OpenAIModel(Model):
                     echo=echo,
                     stop=stop_token
                 )
-            except openai.error.RateLimitError as e:
+            except Exception as e:
                 last_exc = e
-                print(f"ERROR: OPENAI Rate Error: {e}")
-                time.sleep(self.gpt_waittime + int(random.randint(1, 10)))
-            except openai.error.APIError as e:
-                last_exc = e
-                print(f"ERROR: OPENAI API Error: {e}")
-            except openai.error.Timeout as e:
-                last_exc = e
-                print(f"ERROR: OPENAI Timeout Error: {e}")
-            except openai.error.APIConnectionError as e:
-                last_exc = e
-                print(f"ERROR: OPENAI APIConnection Error: {e}")
-            except openai.error.ServiceUnavailableError as e:
-                last_exc = e
-                print(f"ERROR: OPENAI Service Error: {e}")
+                if "rate" in str(e).lower():
+                    print(f"ERROR: OPENAI Rate Error: {e}")
+                    time.sleep(self.gpt_waittime + int(random.randint(1, 10)))
+                else:
+                    print(f"ERROR: OPENAI API Error: {e}")
         # make a fake response
         return {
                 "text": prompt + " OPENAI Error - " + str(last_exc),
@@ -207,7 +198,7 @@ class OpenAIModel(Model):
                 if system_prompt:
                     messages = [{'role': 'system', 'content': system_prompt}, {"role": "user", "content": prompt}]
 
-                return openai.ChatCompletion.create(
+                return self.client.chat.completions.create(
                     model=self.engine,
                     messages=messages,
                     temperature=temperature,
@@ -216,22 +207,17 @@ class OpenAIModel(Model):
                     n=num_samples,
                     stop=stop_token
                 )
-            except openai.error.RateLimitError as e:
+            except Exception as e:
                 last_exc = e
-                print(f"ERROR: OPENAI Rate Error: {e}")
-                time.sleep(self.gpt_waittime)
-            except openai.error.APIError as e:
-                last_exc = e
-                print(f"ERROR: OPENAI API Error: {e}")
-            except openai.error.Timeout as e:
-                last_exc = e
-                print(f"ERROR: OPENAI Timeout Error: {e}")
-            except openai.error.APIConnectionError as e:
-                last_exc = e
-                print(f"ERROR: OPENAI APIConnection Error: {e}")
-            except openai.error.ServiceUnavailableError as e:
-                last_exc = e
-                print(f"ERROR: OPENAI Service Error: {e}")
+                if "rate" in str(e).lower():
+                    print(f"ERROR: OPENAI Rate Error: {e}")
+                    time.sleep(self.gpt_waittime)
+                elif "timeout" in str(e).lower():
+                    print(f"ERROR: OPENAI Timeout Error: {e}")
+                elif "connection" in str(e).lower():
+                    print(f"ERROR: OPENAI Connection Error: {e}")
+                else:
+                    print(f"ERROR: OPENAI API Error: {e}")
         # make a fake response
         return {
             "text": prompt + " OPENAI Error - " + str(last_exc),

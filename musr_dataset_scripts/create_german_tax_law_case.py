@@ -3,14 +3,20 @@ CrewAI entry script: generate one German tax law case using Crew-guided tasks.
 
 Run with:
   # Basic mode (Structure + Forbidden validators only)
-  PYTHONPATH=. OPENAI_API_KEY=... python musr_dataset_scripts/create_german_tax_law_case.py
+  PYTHONPATH=. python musr_dataset_scripts/create_german_tax_law_case.py
   
   # Advanced mode (with LLM-based validation - more accurate but expensive)
-  PYTHONPATH=. OPENAI_API_KEY=... python musr_dataset_scripts/create_german_tax_law_case.py --use-model-validator
+  PYTHONPATH=. python musr_dataset_scripts/create_german_tax_law_case.py --use-model-validator
+
+Make sure to set OPENAI_API_KEY in your .env file.
 """
 
 import argparse
+from dotenv import load_dotenv
 from src.crews.runner import run_single_german_tax_case
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def main():

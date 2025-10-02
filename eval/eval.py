@@ -8,6 +8,13 @@ from transformers import AutoTokenizer
 import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import collections
+from dotenv import load_dotenv
+
+# Add project root to Python path for imports
+sys.path.append(str(Path(__file__).parent.parent))
+
+# Load environment variables from .env file
+load_dotenv()
 
 random.seed(0)
 
@@ -17,10 +24,16 @@ from src.logic_tree.tree import LogicTree, LogicNode, LogicNodeFactType
 from src.madlib.madlib import Madlib
 from src.utils.paths import OUTPUT_FOLDER
 
-from eval.icl.murder_mystery_solved_ex import murder_mystery_solved_ex
-from eval.icl.object_placements_solved_ex import object_placements_solved_ex
-from eval.icl.team_allocation_solved_ex import team_allocation_solved_ex
-from eval.icl.german_tax_solved_ex import german_tax_solved_ex
+# Import from current directory's icl module
+import os
+current_dir = os.path.dirname(__file__)
+icl_dir = os.path.join(current_dir, 'icl')
+sys.path.insert(0, icl_dir)
+
+from murder_mystery_solved_ex import murder_mystery_solved_ex
+from object_placements_solved_ex import object_placements_solved_ex
+from team_allocation_solved_ex import team_allocation_solved_ex
+from german_tax_solved_ex import german_tax_solved_ex
 
 
 def main():
@@ -119,8 +132,8 @@ def main():
 
     datasets = {}
     run_data = {}
+    #out_file = Path("eval_results.json")
     out_file = None # Can save results to a json file, should be a path object.
-
     run_cost = 0.0
 
     for model_info in models_to_test:
@@ -232,7 +245,7 @@ def main():
 
                             if isinstance(m, OpenAIModel):
                                 raw = m.inference(prompt, system_prompt=d.get("system_prompt"))
-                                output = raw.choices[0]['message']['content']
+                                output = raw.choices[0].message.content
                             else:
                                 if d.get("system_prompt") and model_info.get("system_prompt_template"):
                                     prompt = model_info.get("system_prompt_template").replace("{system_prompt}", d.get('system_prompt')).replace("{prompt}", prompt)
