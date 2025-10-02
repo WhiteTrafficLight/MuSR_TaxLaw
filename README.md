@@ -51,11 +51,15 @@ OPENAI_API_KEY=key python musr_dataset_scripts/create_german_tax_law_case.py
 The generated dataset will be saved in datasets/german_tax_law_case.json
 
 ## Key Implementation
-<p align="center">
-  <img src="./assets/tree_comparison.png" alt="Tree Comparison between Murder Mystery & Tax Law Case" width="600"/>
-</p>
 
 ### Domain Seed Replacement
+
+<p align="center">
+  <img src="./assets/tree_comparison.png" alt="Tree Comparison between Murder Mystery & Tax Law Case" width="1000"/>
+</p>
+
+Replaced murder mystery MMO(Motivation, Means, Opportunity) components and related domain seed to LEP(Applicable Law, Economic Activity, Procedural Requirements).
+
 
 ### CrewAI Integration for Modular Prompt Management
 
