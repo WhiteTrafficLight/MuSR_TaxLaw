@@ -43,3 +43,42 @@ STORY_GENERATION_PROMPT = {
     "example_output": STORY_GENERATION_EXAMPLE_OUTPUT
 }
 
+COURT_DECISION_TASK_TEMPLATE = """
+**Example Case Information:**
+{example_case_str}
+
+**Example Facts to Include:**
+{example_facts_str}
+
+**Example Output:**
+{example_output}
+
+---
+
+**Your Task:**
+
+**Case Information:**
+{case_info_str}
+
+**Facts you must include:**
+{facts_str}
+
+Write a formal court decision section that:
+1. Presents all the facts listed above in formal court language
+2. Uses third person and passive voice
+3. Integrates facts naturally without explicit section headings
+4. Maintains professional neutrality and legal precision throughout
+5. Focuses purely on factual presentation without drawing conclusions
+
+**CRITICAL CONSTRAINTS:**
+This text will be used for logical reasoning exercises where readers must infer the final decision themselves. Therefore:
+- Do NOT hint at whether applicable law is "clear" or "unclear"
+- Do NOT hint at whether economic activity is "sufficient" or "insufficient"  
+- Do NOT hint at whether procedural requirements are "compliant" or "deficient"
+- Do NOT hint at the final decision (accept/accept with conditions/reject)
+- Include all factual content from the list above, but remove or rephrase any expressions that obviously suggest element status or final judgment
+- Present facts neutrally so readers must perform logical inference to reach conclusions
+
+Write only the factual content, without title, case number, or concluding remarks.
+""".strip()
+

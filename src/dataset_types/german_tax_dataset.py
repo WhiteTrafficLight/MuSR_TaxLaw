@@ -13,7 +13,6 @@ from copy import deepcopy
 import random
 
 from src.dataset_builder import DatasetBuilder
-from src.logic_tree.tree import LogicTree
 
 
 class GermanTaxDataset(DatasetBuilder):

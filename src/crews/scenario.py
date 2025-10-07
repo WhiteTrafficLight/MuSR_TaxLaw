@@ -12,7 +12,7 @@ from src.utils.paths import ROOT_FOLDER
 
 def sample_scenario() -> Tuple[Dict, str, Madlib, Madlib, str]:
     """
-    Sample a base scenario (taxpayer, business sector, transaction type).
+    Sample a base scenario (business sector, transaction type).
     
     Returns:
         Tuple of (scenario_info, scenario_header, base_madlib, tx_madlib, tx_type)
@@ -28,18 +28,7 @@ def sample_scenario() -> Tuple[Dict, str, Madlib, Madlib, str]:
         }
     )
 
-    description_string = """Taxpayer: {taxpayer}
-Business sector: {business_sector}"""
-
-    case_strings, case_dicts, _ = creator.sample_madlib(
-        base_madlib,
-        ['taxpayer_types', 'business_sectors'],
-        description_string_format=description_string,
-        sampled_item_names=['taxpayer', 'business_sector']
-    )
-
-    scenario_info = case_dicts[0]
-    business_sector = scenario_info['business_sector']
+    business_sector = base_madlib.sample("business_sectors")[0]
 
     # Select transaction type based on business sector
     tx_types_map_path = ROOT_FOLDER / 'domain_seed/transaction_types_map.json'
@@ -63,7 +52,8 @@ Business sector: {business_sector}"""
         }
     )
 
-    return scenario_info, case_strings[0], base_madlib, tx_madlib, tx_type
+    scenario_info = {'business_sector': business_sector}
+    return scenario_info, "", base_madlib, tx_madlib, tx_type
 
 
 def build_case_variants(

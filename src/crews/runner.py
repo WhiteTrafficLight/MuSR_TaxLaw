@@ -17,7 +17,7 @@ from src.crews.agents import create_tree_agent, create_story_agent
 from src.crews.scenario import sample_scenario, build_case_variants
 from src.crews.tree_builder import make_root_tree, expand_tree_with_crew
 from src.crews.html_renderer import generate_html_page_comparison
-from src.crews.config.prompts.story import STORY_GENERATION_PROMPT
+from src.crews.config.prompts.story import STORY_GENERATION_PROMPT, COURT_DECISION_TASK_TEMPLATE
 
 
 
@@ -38,19 +38,6 @@ def run_single_german_tax_case(use_model_validator: bool = False):
     out_file = OUTPUT_FOLDER / 'german_tax_law_case.json'
     out_file.parent.mkdir(exist_ok=True, parents=True)
     html_file = ROOT_FOLDER / 'german_tax_law_case.html'
-
-    # Initialize models
-    model = OpenAIModel(
-        engine='gpt-4',
-        api_max_attempts=30,
-        api_endpoint='chat',
-        temperature=1.0,
-        top_p=1.0,
-        max_tokens=2400,
-        num_samples=1,
-        prompt_cost=0.03/1000,
-        completion_cost=0.06/1000
-    )
     
     # Optional: model for validation (if enabled)
     model_validator_model = None
@@ -152,48 +139,13 @@ Economic activity: {economic_activity_str}
 Procedural requirement: {procedural_requirement_str}
 Tax authority: {tax_authority_str}"""
         
-        # Create story generation task
-        story_task_description = f"""
-Write a formal German tax court decision section that presents the case facts objectively.
-
-**Example Case Information:**
-{example_case_str}
-
-**Example Facts to Include:**
-{example_facts_str}
-
-**Example Output:**
-{example_output}
-
----
-
-**Your Turn:**
-
-**Case Information:**
-{case_info_str}
-
-**Facts you must include:**
-{facts_str}
-
-**Your Task:**
-Write a formal court decision section that:
-1. Presents all the facts listed above in formal court language
-2. Uses third person and passive voice
-3. Integrates facts naturally without explicit section headings
-4. Maintains professional neutrality and legal precision throughout
-5. Focuses purely on factual presentation without drawing conclusions
-
-**CRITICAL CONSTRAINTS:**
-This text will be used for logical reasoning exercises where readers must infer the final decision themselves. Therefore:
-- Do NOT hint at whether applicable law is "clear" or "unclear"
-- Do NOT hint at whether economic activity is "sufficient" or "insufficient"  
-- Do NOT hint at whether procedural requirements are "compliant" or "deficient"
-- Do NOT hint at the final decision (accept/accept with conditions/reject)
-- Include all factual content from the list above, but remove or rephrase any expressions that obviously suggest element status or final judgment
-- Present facts neutrally so readers must perform logical inference to reach conclusions
-
-Write only the factual content, without title, case number, or concluding remarks.
-""".strip()
+        story_task_description = COURT_DECISION_TASK_TEMPLATE.format(
+            example_case_str=example_case_str,
+            example_facts_str=example_facts_str,
+            example_output=example_output,
+            case_info_str=case_info_str,
+            facts_str=facts_str
+        )
         
         story_task = Task(
             description=story_task_description,
@@ -252,14 +204,8 @@ Case 2:
     html_content = generate_html_page_comparison(case_data, stories, labeled, business_sector, tx_type)
     html_file.write_text(html_content, encoding='utf-8')
 
-    # Print cost summary
-    total_cost = model.total_cost
-    if use_model_validator and model_validator_model:
-        total_cost += model_validator_model.total_cost
-        if early_escape_model:
-            total_cost += early_escape_model.total_cost
     
     print('✅ Wrote dataset to', str(out_file))
     print('✅ Wrote HTML to', str(html_file))
-    print(f'💰 Total cost: ${total_cost:.4f}')
+
 
